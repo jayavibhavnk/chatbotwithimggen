@@ -6,7 +6,7 @@ from langchain.chains import LLMChain
 from PIL import Image
 from io import BytesIO
 
-# OPENAI_API_KEY = st.secrets.OPENAI_API_KEY
+OPENAI_API_KEY = st.secrets.OPENAI_API_KEY
 
 st.set_page_config(
         page_title="Chatbor Name here",
