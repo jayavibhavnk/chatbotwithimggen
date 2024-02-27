@@ -11,7 +11,7 @@ OPENAI_API_KEY = st.secrets.OPENAI_API_KEY
 st.set_page_config(
         page_title="Chatbor Name here",
         page_icon="✍️",
-        # layout="wide",
+        layout="wide",
         initial_sidebar_state="expanded",
     )
 
@@ -65,7 +65,7 @@ if customization_options['Generation_type'] == "Text":
 
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-
+        
         msg = query_openai(prompt)
 
         st.session_state.messages.append({"role": "assistant", "content": msg})
