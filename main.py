@@ -15,7 +15,7 @@ openai.api_key=OPENAI_API_KEY
 st.set_page_config(
         page_title="CogniLearn",
         page_icon="✍️",
-        # layout="wide",
+        layout="wide",
         initial_sidebar_state="expanded",
     )
 
