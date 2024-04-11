@@ -1,17 +1,20 @@
 import streamlit as st
 import time
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.chains import LLMChain
+import openai
 from PIL import Image
 from io import BytesIO
 
+from openai import OpenAI
+client = OpenAI()
+
 OPENAI_API_KEY = st.secrets.OPENAI_API_KEY
 
+openai.api_key=OPENAI_API_KEY
+
 st.set_page_config(
-        page_title="Chatbor Name here",
+        page_title="chatbor",
         page_icon="✍️",
-        layout="wide",
+        # layout="wide",
         initial_sidebar_state="expanded",
     )
 
@@ -22,9 +25,7 @@ customization_options = {
     }
 
 
-st.title("💬 yo yo chatbot")
-
-llm = ChatOpenAI(temperature=0.9, openai_api_key = OPENAI_API_KEY)
+st.title("💬 yo yo chatbor")
 
 def get_image_from_api(text):
     # Replace with your API function call
@@ -42,17 +43,17 @@ def get_image_from_api(text):
 
     return image_bytes
 
-def query_openai(text):
-    prompt = "{prompt}"
-    prompt = ChatPromptTemplate.from_template(
-        prompt
+def query_openai(query):
+    completion = client.chat.completions.create(
+    model="gpt-4-0125-preview",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": query}
+    ],
+    n = 1
     )
 
-    chain = LLMChain(llm=llm, prompt=prompt)
-
-    res = chain.run(prompt = text)
-
-    return res
+    return(completion.choices[0].message.content)
 
 if customization_options['Generation_type'] == "Text":
     if "messages" not in st.session_state:
