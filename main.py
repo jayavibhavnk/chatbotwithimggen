@@ -8,6 +8,7 @@ from openai import OpenAI
 client = OpenAI()
 
 OPENAI_API_KEY = st.secrets.OPENAI_API_KEY
+HF_KEY = st.secrets.HF_KEY
 
 openai.api_key=OPENAI_API_KEY
 
@@ -32,7 +33,7 @@ def get_image_from_api(text):
     import requests
 
     API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-    headers = {"Authorization": "Bearer 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"}
+    headers = {"Authorization": "Bearer {}".format(HF_KEY)}
 
     def query(payload):
         response = requests.post(API_URL, headers=headers, json=payload)
@@ -66,7 +67,7 @@ if customization_options['Generation_type'] == "Text":
 
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-        with st.spinner("Generating Image..."):
+        with st.spinner("Thinking..."):
                 msg = query_openai(prompt)
 
                 st.session_state.messages.append({"role": "assistant", "content": msg})
