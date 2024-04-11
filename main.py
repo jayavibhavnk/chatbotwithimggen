@@ -12,7 +12,7 @@ OPENAI_API_KEY = st.secrets.OPENAI_API_KEY
 openai.api_key=OPENAI_API_KEY
 
 st.set_page_config(
-        page_title="chatbor",
+        page_title="CogniLearn",
         page_icon="✍️",
         # layout="wide",
         initial_sidebar_state="expanded",
@@ -25,7 +25,7 @@ customization_options = {
     }
 
 
-st.title("💬 yo yo chatbor")
+st.title("💬 CogniLearn - your essential educational chatbot!")
 
 def get_image_from_api(text):
     # Replace with your API function call
@@ -45,7 +45,7 @@ def get_image_from_api(text):
 
 def query_openai(query):
     completion = client.chat.completions.create(
-    model="gpt-4-0125-preview",
+    model="ggpt-3.5-turbo-0125",
     messages=[
         {"role": "system", "content": "You are a helpful assistant"},
         {"role": "user", "content": query}
