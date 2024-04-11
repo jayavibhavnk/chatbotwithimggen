@@ -66,11 +66,11 @@ if customization_options['Generation_type'] == "Text":
 
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-        
-        msg = query_openai(prompt)
+        with st.spinner("Generating Image..."):
+                msg = query_openai(prompt)
 
-        st.session_state.messages.append({"role": "assistant", "content": msg})
-        st.chat_message("assistant").write(msg)
+                st.session_state.messages.append({"role": "assistant", "content": msg})
+                st.chat_message("assistant").write(msg)
 
 if customization_options['Generation_type'] == "Image":
     try:
