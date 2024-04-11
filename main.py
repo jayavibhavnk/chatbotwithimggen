@@ -45,7 +45,7 @@ def get_image_from_api(text):
 
 def query_openai(query):
     completion = client.chat.completions.create(
-    model="ggpt-3.5-turbo-0125",
+    model="gpt-3.5-turbo-0125",
     messages=[
         {"role": "system", "content": "You are a helpful assistant"},
         {"role": "user", "content": query}
