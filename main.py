@@ -18,7 +18,7 @@ st.set_page_config(
         initial_sidebar_state="expanded",
     )
 
-st.sidebar.title("Customization Options")
+st.sidebar.title("Generation Type:")
 
 customization_options = {
         "Generation_type": st.sidebar.radio("Generation Type", ["Text", "Image"])
