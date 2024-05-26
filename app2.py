@@ -7,8 +7,8 @@ import openai
 import nbformat
 from GraphRetrieval import GraphRAG
 
-# Initialize OpenAI client
-openai.api_key = 'your_openai_api_key_here'
+from openai import OpenAI
+client = OpenAI()
 
 # Function to get the contents of a repository
 def get_repo_contents(owner, repo, path=""):
