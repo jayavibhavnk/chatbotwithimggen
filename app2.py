@@ -110,12 +110,9 @@ def main():
                 
                 st.markdown(explanation)
                 
-                # Create graph from downloaded content using GraphRAG
+                # Create graph from downloaded content as text using GraphRAG
                 grag = GraphRAG()
-                if save_temp:
-                    grag.create_graph_from_directory(temp_dir)
-                else:
-                    grag.create_graph_from_directory(save_dir)
+                grag.create_graph_from_text(all_files_content)
 
                 st.write("Graph Created!")
                 
