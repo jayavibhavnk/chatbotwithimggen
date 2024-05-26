@@ -5,6 +5,7 @@ import shutil
 import streamlit as st
 import openai
 import nbformat
+from GraphRetrieval import GraphRAG
 
 # Initialize OpenAI client
 from openai import OpenAI
@@ -108,6 +109,20 @@ def main():
                 explanation = query_openai(explanation_query + "\n\n" + all_files_content)
                 
                 st.markdown(explanation)
+                
+                # Create graph from downloaded content using GraphRAG
+                grag = GraphRAG()
+                if save_temp:
+                    grag.create_graph_from_directory(temp_dir)
+                else:
+                    grag.create_graph_from_directory(save_dir)
+                
+                # User query input box
+                user_query = st.text_input("Ask a question about the code")
+                if user_query:
+                    response = grag.queryLLM(user_query)
+                    st.write(response)
+                
             else:
                 st.error("Please enter both GitHub username and repository name.")
     
@@ -136,6 +151,16 @@ def main():
             explanation = query_openai(explanation_query + "\n\n" + all_files_content)
             
             st.markdown(explanation)
+            
+            # Create graph from uploaded content using GraphRAG
+            grag = GraphRAG()
+            grag.create_graph_from_text(all_files_content)
+            
+            # User query input box
+            user_query = st.text_input("Ask a question about the code")
+            if user_query:
+                response = grag.queryLLM(user_query)
+                st.write(response)
 
 if __name__ == "__main__":
     main()
