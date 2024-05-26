@@ -3,6 +3,8 @@ import requests
 import tempfile
 import shutil
 import streamlit as st
+from openai import OpenAI
+client = OpenAI()
 
 # Function to get the contents of a repository
 def get_repo_contents(owner, repo, path=""):
@@ -39,9 +41,6 @@ def download_repo(owner, repo, save_dir=None, path=""):
             all_files_content += download_repo(owner, repo, save_dir, item['path'])
     
     return all_files_content
-
-from openai import OpenAI
-client = OpenAI()
 # Function to query OpenAI
 
 def query_openai(query):
