@@ -106,7 +106,7 @@ def main():
                 
                 # Get explanation from OpenAI
                 explanation_query = "give me the explanation of this code as a markdown"
-                explanation = query_openai(explanation_query + "\n\n" + all_files_content)
+                explanation = query_openai(explanation_query + "\n\n" + all_files_content[:16000])
                 
                 st.markdown(explanation)
                 
@@ -116,6 +116,8 @@ def main():
                     grag.create_graph_from_directory(temp_dir)
                 else:
                     grag.create_graph_from_directory(save_dir)
+
+                st.write("Graph Created!")
                 
                 # User query input box
                 user_query = st.text_input("Ask a question about the code")
