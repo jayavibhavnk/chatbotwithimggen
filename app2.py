@@ -49,18 +49,16 @@ def download_repo(owner, repo, save_dir=None, path=""):
 
 # Function to query OpenAI with exception handling
 def query_openai(query):
-    try:
-        completion = client.chat.completions.create(
-            model="gpt-3.5-turbo-0125",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant"},
-                {"role": "user", "content": query}
-            ],
-            n=1
-        )
-        return completion.choices[0].message['content']
-    except Exception as e:
-        return f"An error occurred: {str(e)}"
+    completion = client.chat.completions.create(
+    model="gpt-3.5-turbo-0125",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": query}
+    ],
+    n = 1
+    )
+
+    return(completion.choices[0].message.content)
 
 # Function to convert Jupyter notebook to plain text
 def notebook_to_text(nb):
