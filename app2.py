@@ -3,7 +3,10 @@ import requests
 import tempfile
 import shutil
 import streamlit as st
+import openai
+import nbformat
 
+# Initialize OpenAI client
 from openai import OpenAI
 client = OpenAI()
 
@@ -42,24 +45,35 @@ def download_repo(owner, repo, save_dir=None, path=""):
             all_files_content += download_repo(owner, repo, save_dir, item['path'])
     
     return all_files_content
-# Function to query OpenAI
 
+# Function to query OpenAI
 def query_openai(query):
     completion = client.chat.completions.create(
-    model="gpt-3.5-turbo-0125",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant"},
-        {"role": "user", "content": query}
-    ],
-    n = 1
+        model="gpt-3.5-turbo-0125",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant"},
+            {"role": "user", "content": query}
+        ],
+        n=1
     )
 
-    return(completion.choices[0].message.content)
+    return completion.choices[0].message.content
+
+# Function to convert Jupyter notebook to plain text
+def notebook_to_text(nb):
+    cells = nb['cells']
+    text = ''
+    for cell in cells:
+        if cell['cell_type'] == 'code':
+            text += ''.join(cell['source']) + '\n'
+    return text
 
 # Main function to run the script
 def main():
-    st.title("GitHub Repository Downloader")
+    st.title("GitHub Repository Downloader and File Explainer")
     
+    # GitHub Repository Downloader
+    st.header("Download GitHub Repository")
     owner = st.text_input("GitHub Username", "your_github_username")
     repo = st.text_input("Repository Name", "your_repository_name")
     save_temp = st.checkbox("Save Temporarily", True)
@@ -80,6 +94,32 @@ def main():
             all_files_content = download_repo(owner, repo, save_dir)
             st.write(f"Repository downloaded at {save_dir}")
             st.text_area("All Files Content", all_files_content, height=300)
+        
+        # Get explanation from OpenAI
+        explanation_query = "give me the explanation of this code as a markdown"
+        explanation = query_openai(explanation_query + "\n\n" + all_files_content)
+        
+        st.markdown(explanation)
+    
+    # File Uploader and Explainer
+    st.header("Upload Files for Explanation")
+    uploaded_files = st.file_uploader("Choose a file", accept_multiple_files=True, type=["py", "ipynb"])
+    
+    if uploaded_files:
+        all_files_content = ""
+        for uploaded_file in uploaded_files:
+            if uploaded_file.type == "application/x-ipynb+json":
+                # Parse Jupyter notebook
+                notebook = nbformat.read(uploaded_file, as_version=4)
+                file_content = notebook_to_text(notebook)
+            else:
+                # Read Python script
+                file_content = uploaded_file.read().decode("utf-8")
+            
+            all_files_content += file_content + "\n"
+        
+        # Display the content of the uploaded files
+        st.text_area("Uploaded Files Content", all_files_content, height=300)
         
         # Get explanation from OpenAI
         explanation_query = "give me the explanation of this code as a markdown"
