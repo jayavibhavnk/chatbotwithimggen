@@ -43,16 +43,18 @@ def download_repo(owner, repo, save_dir=None, path=""):
 from openai import OpenAI
 client = OpenAI()
 # Function to query OpenAI
+
 def query_openai(query):
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0301",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant"},
-            {"role": "user", "content": query}
-        ],
-        n=1
+    completion = client.chat.completions.create(
+    model="gpt-3.5-turbo-0125",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": query}
+    ],
+    n = 1
     )
-    return completion.choices[0].message['content']
+
+    return(completion.choices[0].message.content)
 
 # Main function to run the script
 def main():
