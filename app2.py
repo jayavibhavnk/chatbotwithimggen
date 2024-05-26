@@ -40,6 +40,8 @@ def download_repo(owner, repo, save_dir=None, path=""):
     
     return all_files_content
 
+from openai import OpenAI
+client = OpenAI()
 # Function to query OpenAI
 def query_openai(query):
     completion = openai.ChatCompletion.create(
