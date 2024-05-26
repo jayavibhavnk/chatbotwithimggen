@@ -13,7 +13,7 @@ HF_KEY = st.secrets.HF_KEY
 openai.api_key=OPENAI_API_KEY
 
 st.set_page_config(
-        page_title="CogniLearn",
+        page_title="GRAEL Chatbot",
         page_icon="✍️",
         layout="wide",
         initial_sidebar_state="expanded",
@@ -26,7 +26,7 @@ customization_options = {
     }
 
 
-st.title("💬 CogniLearn - your essential educational chatbot!")
+st.title("💬 GRAEL CB - your essential educational chatbot!")
 
 def get_image_from_api(text):
     # Replace with your API function call
