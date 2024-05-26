@@ -71,7 +71,7 @@ def notebook_to_text(nb):
 
 # Main function to run the script
 def main():
-    st.title("Code Downloader and Explainer")
+    st.title("GRAEL - Code Explainer!!")
 
     if "repo_content" not in st.session_state:
         st.session_state.repo_content = ""
