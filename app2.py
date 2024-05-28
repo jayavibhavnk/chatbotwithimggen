@@ -11,16 +11,22 @@ from openai import OpenAI
 client = OpenAI()
 
 # Function to get the contents of a repository
-def get_repo_contents(owner, repo, path=""):
+def get_repo_contents(owner, repo, path="", token=None):
+    headers = {}
+    if token:
+        headers["Authorization"] = f"token {token}"
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     response.raise_for_status()  # Ensure we notice bad responses
     return response.json()
 
 # Function to download a file from GitHub and return its content
-def download_file(owner, repo, file_path, save_dir=None):
-    url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/{file_path}"
-    response = requests.get(url)
+def download_file(owner, repo, file_path, branch="main", save_dir=None, token=None):
+    headers = {}
+    if token:
+        headers["Authorization"] = f"token {token}"
+    url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{file_path}"
+    response = requests.get(url, headers=headers)
     response.raise_for_status()  # Ensure we notice bad responses
     
     content = response.content
@@ -34,31 +40,32 @@ def download_file(owner, repo, file_path, save_dir=None):
     return content.decode('utf-8')
 
 # Function to recursively download all files in a repository and return their content
-def download_repo(owner, repo, save_dir=None, path=""):
-    contents = get_repo_contents(owner, repo, path)
+def download_repo(owner, repo, save_dir=None, path="", branch="main", token=None):
+    contents = get_repo_contents(owner, repo, path, token)
     all_files_content = ""
     for item in contents:
         if item['type'] == 'file':
-            file_content = download_file(owner, repo, item['path'], save_dir)
+            file_content = download_file(owner, repo, item['path'], branch, save_dir, token)
             all_files_content += file_content + "\n"
         elif item['type'] == 'dir':
-            all_files_content += download_repo(owner, repo, save_dir, item['path'])
+            all_files_content += download_repo(owner, repo, save_dir, item['path'], branch, token)
     
     return all_files_content
 
 # Function to query OpenAI with exception handling
-
 def query_openai(query):
-    completion = client.chat.completions.create(
-    model="gpt-3.5-turbo-0125",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant"},
-        {"role": "user", "content": query}
-    ],
-    n = 1
-    )
-
-    return(completion.choices[0].message.content)
+    try:
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo-0125",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant"},
+                {"role": "user", "content": query}
+            ],
+            n=1
+        )
+        return completion.choices[0].message.content
+    except Exception as e:
+        return str(e)
 
 # Function to convert Jupyter notebook to plain text
 def notebook_to_text(nb):
@@ -85,6 +92,10 @@ def main():
         st.session_state.owner = ""
     if "repo" not in st.session_state:
         st.session_state.repo = ""
+    if "branch" not in st.session_state:
+        st.session_state.branch = "main"
+    if "token" not in st.session_state:
+        st.session_state.token = ""
     if "save_temp" not in st.session_state:
         st.session_state.save_temp = True
 
@@ -97,38 +108,48 @@ def main():
         st.header("Download GitHub Repository")
         st.session_state.owner = st.text_input("GitHub Username", st.session_state.owner)
         st.session_state.repo = st.text_input("Repository Name", st.session_state.repo)
+        st.session_state.branch = st.text_input("Branch (default is 'main')", st.session_state.branch)
+        st.session_state.token = st.text_input("GitHub Personal Access Token (optional)", type="password")
         st.session_state.save_temp = st.checkbox("Save Temporarily", st.session_state.save_temp)
         
         if st.button("Download Repository"):
             if st.session_state.owner and st.session_state.repo:
-                if st.session_state.save_temp:
-                    # Create a temporary directory
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        st.session_state.repo_content = download_repo(st.session_state.owner, st.session_state.repo, temp_dir)
-                        st.write(f"Repository downloaded temporarily at {temp_dir}")
-                        # Provide a link to download the files as a zip
-                        shutil.make_archive(temp_dir, 'zip', temp_dir)
-                        with open(f"{temp_dir}.zip", "rb") as f:
-                            st.download_button("Download ZIP", f, file_name=f"{st.session_state.repo}.zip")
+                try:
+                    if st.session_state.save_temp:
+                        # Create a temporary directory
+                        with tempfile.TemporaryDirectory() as temp_dir:
+                            st.session_state.repo_content = download_repo(
+                                st.session_state.owner, st.session_state.repo, temp_dir, branch=st.session_state.branch, token=st.session_state.token
+                            )
+                            st.write(f"Repository downloaded temporarily at {temp_dir}")
+                            # Provide a link to download the files as a zip
+                            shutil.make_archive(temp_dir, 'zip', temp_dir)
+                            with open(f"{temp_dir}.zip", "rb") as f:
+                                st.download_button("Download ZIP", f, file_name=f"{st.session_state.repo}.zip")
+                            st.text_area("All Files Content", st.session_state.repo_content, height=300)
+                    else:
+                        save_dir = st.text_input("Save Directory", "path_to_save_directory")
+                        st.session_state.repo_content = download_repo(
+                            st.session_state.owner, st.session_state.repo, save_dir, branch=st.session_state.branch, token=st.session_state.token
+                        )
+                        st.write(f"Repository downloaded at {save_dir}")
                         st.text_area("All Files Content", st.session_state.repo_content, height=300)
-                else:
-                    save_dir = st.text_input("Save Directory", "path_to_save_directory")
-                    st.session_state.repo_content = download_repo(st.session_state.owner, st.session_state.repo, save_dir)
-                    st.write(f"Repository downloaded at {save_dir}")
-                    st.text_area("All Files Content", st.session_state.repo_content, height=300)
-                
-                # Get explanation from OpenAI
-                explanation_query = "give me the explanation of this code as a markdown"
-                st.session_state.explanation = query_openai(explanation_query + "\n\n" + st.session_state.repo_content[:16000])
-                
-                st.markdown(st.session_state.explanation)
-                
-                # Create graph from downloaded content as text using GraphRAG
-                grag = GraphRAG()
-                grag.create_graph_from_text(st.session_state.repo_content)
+                    
+                    # Get explanation from OpenAI
+                    explanation_query = "give me the explanation of this code as a markdown"
+                    st.session_state.explanation = query_openai(explanation_query + "\n\n" + st.session_state.repo_content[:16000])
+                    
+                    st.markdown(st.session_state.explanation)
+                    
+                    # Create graph from downloaded content as text using GraphRAG
+                    grag = GraphRAG()
+                    grag.create_graph_from_text(st.session_state.repo_content)
 
-                st.session_state.graph_created = True
-                st.write("Graph Created!")
+                    st.session_state.graph_created = True
+                    st.write("Graph Created!")
+                
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
                 
     elif option == "Upload Files for Explanation":
         st.header("Upload Files for Explanation")
