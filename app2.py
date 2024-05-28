@@ -112,7 +112,7 @@ def main():
         st.session_state.token = st.secrets['github_pat'] # st.text_input("GitHub Personal Access Token (optional)", type="password")
         st.session_state.save_temp = st.checkbox("Save Temporarily", st.session_state.save_temp)
         
-        if st.button("Download Repository"):
+        if st.button("Explain Repository"):
             if st.session_state.owner and st.session_state.repo:
                 try:
                     if st.session_state.save_temp:
@@ -136,7 +136,7 @@ def main():
                         st.text_area("All Files Content", st.session_state.repo_content, height=300)
                     
                     # Get explanation from OpenAI
-                    explanation_query = "give me the explanation of this code as a markdown"
+                    explanation_query = "give me the explanation of this code as a markdown You will always start with The project title and do not use phrases such as here is your code explanation"
                     st.session_state.explanation = query_openai(explanation_query + "\n\n" + st.session_state.repo_content[:16000])
                     
                     st.markdown(st.session_state.explanation)
