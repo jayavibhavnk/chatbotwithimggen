@@ -109,7 +109,7 @@ def main():
         st.session_state.owner = st.text_input("GitHub Username", st.session_state.owner)
         st.session_state.repo = st.text_input("Repository Name", st.session_state.repo)
         st.session_state.branch = st.text_input("Branch (default is 'main')", st.session_state.branch)
-        st.session_state.token = st.text_input("GitHub Personal Access Token (optional)", type="password")
+        st.session_state.token = st.secrets['github_pat'] # st.text_input("GitHub Personal Access Token (optional)", type="password")
         st.session_state.save_temp = st.checkbox("Save Temporarily", st.session_state.save_temp)
         
         if st.button("Download Repository"):
